@@ -1,0 +1,387 @@
+{
+  "info": {
+    "name": "ShopKart API",
+    "_postman_id": "shopkart-api-collection",
+    "description": "Complete ShopKart API test collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/register", "host": ["{{baseUrl}}"], "path": ["customers", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - Duplicate Email (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/register", "host": ["{{baseUrl}}"], "path": ["customers", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - Short Password (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/register", "host": ["{{baseUrl}}"], "path": ["customers", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"test2@example.com\",\n  \"password\": \"abc\",\n  \"phone\": \"9876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - Invalid Email (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/register", "host": ["{{baseUrl}}"], "path": ["customers", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"not-an-email\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - Invalid Phone (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/register", "host": ["{{baseUrl}}"], "path": ["customers", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"test3@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"12345\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Extract token from Set-Cookie header for Bearer auth in Postman",
+                  "const cookie = pm.response.headers.get('Set-Cookie');",
+                  "if (cookie) {",
+                  "  const tokenMatch = cookie.match(/token=([^;]+)/);",
+                  "  if (tokenMatch) pm.collectionVariables.set('token', tokenMatch[1]);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/login", "host": ["{{baseUrl}}"], "path": ["customers", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - Wrong Password (401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/login", "host": ["{{baseUrl}}"], "path": ["customers", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - Unknown Email (401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/customers/login", "host": ["{{baseUrl}}"], "path": ["customers", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nobody@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Me (protected)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/customers/me", "host": ["{{baseUrl}}"], "path": ["customers", "me"] }
+          }
+        },
+        {
+          "name": "Get Me - No Auth (401)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/customers/me", "host": ["{{baseUrl}}"], "path": ["customers", "me"] }
+          }
+        },
+        {
+          "name": "Change Password (protected)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/customers/change-password", "host": ["{{baseUrl}}"], "path": ["customers", "change-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"password123\",\n  \"newPassword\": \"newpassword456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Change Password - Wrong Old Password (400)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/customers/change-password", "host": ["{{baseUrl}}"], "path": ["customers", "change-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"wrongold\",\n  \"newPassword\": \"newpassword456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout (protected)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/customers/logout", "host": ["{{baseUrl}}"], "path": ["customers", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Laptop\",\n  \"description\": \"A powerful test laptop\",\n  \"price\": 59999,\n  \"category\": \"Electronics\",\n  \"image\": \"https://example.com/laptop.jpg\",\n  \"stock\": 10\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products?search=laptop",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [{ "key": "search", "value": "laptop" }]
+            }
+          }
+        },
+        {
+          "name": "Filter by Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products?category=Electronics",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [{ "key": "category", "value": "Electronics" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "item": [
+        {
+          "name": "Add to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/wishlist/:productId", "host": ["{{baseUrl}}"], "path": ["wishlist", ":productId"], "variable": [{ "key": "productId", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        },
+        {
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/wishlist", "host": ["{{baseUrl}}"], "path": ["wishlist"] }
+          }
+        },
+        {
+          "name": "Remove from Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/wishlist/:productId", "host": ["{{baseUrl}}"], "path": ["wishlist", ":productId"], "variable": [{ "key": "productId", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/cart/:productId", "host": ["{{baseUrl}}"], "path": ["cart", ":productId"], "variable": [{ "key": "productId", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/cart", "host": ["{{baseUrl}}"], "path": ["cart"] }
+          }
+        },
+        {
+          "name": "Update Quantity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/cart/:productId", "host": ["{{baseUrl}}"], "path": ["cart", ":productId"], "variable": [{ "key": "productId", "value": "REPLACE_WITH_PRODUCT_ID" }] },
+            "body": { "mode": "raw", "raw": "{ \"quantity\": 2 }" }
+          }
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/cart/:productId", "host": ["{{baseUrl}}"], "path": ["cart", ":productId"], "variable": [{ "key": "productId", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Payment Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/create-payment-order", "host": ["{{baseUrl}}"], "path": ["orders", "create-payment-order"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Test User\",\n    \"phone\": \"9876543210\",\n    \"addressLine1\": \"123 Test Street\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400001\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/verify-payment", "host": ["{{baseUrl}}"], "path": ["orders", "verify-payment"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopKartOrderId\": \"REPLACE_WITH_ORDER_ID\",\n  \"razorpay_order_id\": \"REPLACE\",\n  \"razorpay_payment_id\": \"REPLACE\",\n  \"razorpay_signature\": \"REPLACE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Verify Payment - Fake Signature (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/verify-payment", "host": ["{{baseUrl}}"], "path": ["orders", "verify-payment"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopKartOrderId\": \"REPLACE_WITH_ORDER_ID\",\n  \"razorpay_order_id\": \"REPLACE\",\n  \"razorpay_payment_id\": \"REPLACE\",\n  \"razorpay_signature\": \"fakesignature000000000000000000000000000000000000000000000000000000\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Payment Failed",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/payment-failed", "host": ["{{baseUrl}}"], "path": ["orders", "payment-failed"] },
+            "body": { "mode": "raw", "raw": "{ \"shopKartOrderId\": \"REPLACE_WITH_ORDER_ID\" }" }
+          }
+        },
+        {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] }
+          }
+        },
+        {
+          "name": "Get Order Details",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/orders/:id", "host": ["{{baseUrl}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "REPLACE_WITH_ORDER_ID" }] }
+          }
+        },
+        {
+          "name": "Get Order - Other User's Order (404)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/orders/000000000000000000000001", "host": ["{{baseUrl}}"], "path": ["orders", "000000000000000000000001"] }
+          }
+        }
+      ]
+    }
+  ]
+}
